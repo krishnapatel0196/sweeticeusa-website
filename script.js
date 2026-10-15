@@ -99,3 +99,77 @@
     sections.forEach(function (s) { spy.observe(s); });
   }
 })();
+
+// Partner With Us form (modal) — submissions are emailed via FormSubmit
+(function () {
+  "use strict";
+
+  var modal = document.getElementById("partner-modal");
+  var form = document.getElementById("partner-form");
+  if (!modal || !form || typeof modal.showModal !== "function") return; // fall back to mailto links
+
+  var ENDPOINT = "https://formsubmit.co/ajax/business@sweeticeusa.com";
+  var status = form.querySelector(".form-status");
+  var submit = form.querySelector(".form-submit");
+  var email = form.querySelector("#pf-email");
+
+  function setStatus(text, type) {
+    status.textContent = text;
+    status.className = "form-status" + (type ? " is-" + type : "");
+  }
+
+  document.querySelectorAll("[data-partner-form]").forEach(function (link) {
+    link.addEventListener("click", function (e) {
+      e.preventDefault();
+      setStatus("");
+      modal.showModal();
+      form.querySelector("#pf-first").focus();
+    });
+  });
+
+  modal.querySelector("[data-close-modal]").addEventListener("click", function () { modal.close(); });
+  modal.addEventListener("click", function (e) { if (e.target === modal) modal.close(); });
+
+  email.addEventListener("input", function () { email.removeAttribute("aria-invalid"); });
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!email.value.trim() || !email.checkValidity()) {
+      email.setAttribute("aria-invalid", "true");
+      setStatus("Please enter a valid email address.", "error");
+      email.focus();
+      return;
+    }
+
+    var data = {};
+    new FormData(form).forEach(function (value, key) { data[key] = value; });
+    if (data._honey) return; // spam bot
+    var name = [data["First name"], data["Last name"]].filter(Boolean).join(" ");
+    data._subject = "Partnership Inquiry – Sweet Ice" + (name ? " (" + name + ")" : "");
+    data._template = "table";
+    data._captcha = "false";
+
+    submit.disabled = true;
+    submit.textContent = "Sending…";
+    setStatus("");
+
+    fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(data)
+    })
+      .then(function (res) { return res.json().then(function (json) { return { ok: res.ok, json: json }; }); })
+      .then(function (r) {
+        if (!r.ok || String(r.json.success) !== "true") throw new Error(r.json.message || "Send failed");
+        form.reset();
+        setStatus("Thank you! Your message has been sent. We’ll be in touch soon.", "success");
+      })
+      .catch(function () {
+        setStatus("Sorry, something went wrong. Please email us at business@sweeticeusa.com.", "error");
+      })
+      .then(function () {
+        submit.disabled = false;
+        submit.textContent = "Submit";
+      });
+  });
+})();

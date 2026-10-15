@@ -672,3 +672,85 @@ a { color: inherit; }
   .contact-icon { grid-row: span 2; width: 42px; height: 42px; margin-bottom: 0; }
   .contact-card h3 { font-size: 16px; margin-bottom: 4px; }
 }
+
+/* ---------- Partner contact form (modal) ---------- */
+.contact-modal {
+  width: min(620px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--navy);
+  box-shadow: 0 30px 80px -20px rgba(16, 42, 67, .45);
+  overflow: auto;
+}
+.contact-modal::backdrop { background: rgba(16, 42, 67, .6); backdrop-filter: blur(3px); }
+.contact-modal[open] { animation: modal-in .3s var(--ease); }
+@keyframes modal-in { from { opacity: 0; transform: translateY(16px) scale(.98); } }
+
+.contact-form { position: relative; padding: clamp(24px, 5vw, 44px); font-family: var(--font); }
+.modal-title { margin: 0 0 24px; font-size: clamp(28px, 4vw, 38px); font-weight: 800; letter-spacing: -.02em; color: var(--navy); }
+
+.modal-close {
+  position: absolute; top: 16px; right: 16px;
+  display: grid; place-items: center;
+  width: 40px; height: 40px;
+  border: 0; border-radius: 50%;
+  background: var(--sky); color: var(--navy);
+  cursor: pointer;
+  transition: background .2s var(--ease), color .2s var(--ease);
+}
+.modal-close:hover { background: var(--sky-2); color: var(--blue); }
+.modal-close svg { width: 20px; height: 20px; }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "first last"
+    "email message"
+    "phone message";
+  gap: 18px 20px;
+}
+.form-grid .field:nth-child(1) { grid-area: first; }
+.form-grid .field:nth-child(2) { grid-area: last; }
+.field-email { grid-area: email; }
+.field-phone { grid-area: phone; }
+.field-message { grid-area: message; }
+
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field label { font-size: 15px; font-weight: 500; color: var(--navy-70); }
+.field input,
+.field textarea {
+  width: 100%;
+  min-height: 54px;
+  padding: 14px 16px;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--sky);
+  color: var(--navy);
+  font: inherit;
+  font-size: 16px;
+  transition: border-color .2s var(--ease), background .2s var(--ease);
+}
+.field textarea { flex: 1; resize: vertical; }
+.field input:focus,
+.field textarea:focus { outline: none; border-color: var(--blue); background: var(--white); }
+.field input[aria-invalid="true"] { border-color: #D92D20; }
+
+.form-submit { width: 100%; margin-top: 26px; }
+.form-submit[disabled] { opacity: .7; cursor: progress; transform: none; }
+
+.form-status { min-height: 1.4em; margin: 14px 0 0; font-size: 15px; text-align: center; }
+.form-status.is-success { color: #067647; font-weight: 600; }
+.form-status.is-error { color: #D92D20; }
+
+@media (max-width: 560px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas: "first" "last" "email" "phone" "message";
+  }
+  .field textarea { min-height: 140px; }
+}
